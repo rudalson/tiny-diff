@@ -1,9 +1,23 @@
 import { useState } from 'react';
-import { X, GitCompare, FolderOpen, FileCode, Sparkles } from 'lucide-react';
+import { X, GitCompare, FolderOpen, FileCode } from 'lucide-react';
 import FolderCompare from './components/FolderCompare';
 import TextCompare from './components/TextCompare';
 
 type TabType = 'home' | 'folder' | 'text';
+
+const tabStyle = (isActive: boolean): React.CSSProperties => ({
+  display: 'flex',
+  alignItems: 'center',
+  padding: '0 8px 0 12px',
+  fontSize: '0.8rem',
+  whiteSpace: 'nowrap',
+  cursor: 'pointer',
+  borderRight: '1px solid var(--border-color)',
+  borderTop: isActive ? '1px solid var(--accent-color)' : '1px solid transparent',
+  marginBottom: isActive ? '-1px' : 0,
+  background: isActive ? 'var(--bg-active-tab)' : 'transparent',
+  color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
+});
 
 interface Tab {
   id: string;
@@ -46,85 +60,42 @@ export default function App() {
   };
 
   return (
-    <div style={{ background: 'var(--bg-app)', display: 'flex', flexDirection: 'column', height: '100vh', color: 'var(--text-primary)', fontFamily: 'var(--font-sans)' }}>
-      
-      {/* Header / Tab bar (height: 48px) */}
-      <header style={{ background: 'var(--bg-sidebar)', borderBottom: '1px solid var(--border-color)', height: '48px', display: 'flex', alignItems: 'center', userSelect: 'none' }}>
-        
-        {/* Logo / Home Button */}
+    <div style={{ background: 'var(--bg-app)', display: 'flex', flexDirection: 'column', height: '100vh', color: 'var(--text-primary)' }}>
+
+      {/* Tab bar */}
+      <header style={{ background: 'var(--bg-sidebar)', borderBottom: '1px solid var(--border-color)', height: '34px', display: 'flex', alignItems: 'stretch', userSelect: 'none' }}>
         <div
           onClick={() => setActiveTabId('home')}
-          style={{
-            borderColor: 'var(--border-color)',
-            display: 'flex',
-            alignItems: 'center',
-            height: '100%',
-            gap: '8px',
-            paddingLeft: '16px',
-            paddingRight: '16px',
-            borderRight: '1px solid var(--border-color)',
-            cursor: 'pointer',
-            backgroundColor: activeTabId === 'home' ? 'var(--bg-active-tab)' : 'transparent',
-            borderBottom: activeTabId === 'home' ? '2px solid var(--accent-color)' : 'none',
-            color: activeTabId === 'home' ? 'var(--text-primary)' : 'var(--accent-color)',
-            fontFamily: 'var(--font-display)',
-            fontWeight: 700,
-          }}
-          title="Home"
+          className={`tab ${activeTabId === 'home' ? 'is-active' : ''}`}
+          style={tabStyle(activeTabId === 'home')}
+          title="Start"
         >
-          <GitCompare size={18} style={{ color: '#818cf8' }} />
-          <span style={{ fontSize: '0.9rem', letterSpacing: '0.05em' }}>TINYDIFF</span>
+          <GitCompare size={14} style={{ marginRight: '6px', color: 'var(--text-secondary)' }} />
+          <span>TinyDiff</span>
         </div>
 
-        {/* Tab Items (Excluding home) */}
-        <div style={{ display: 'flex', height: '100%', flex: 1, overflowX: 'auto', overflowY: 'hidden' }}>
+        <div style={{ display: 'flex', flex: 1, overflowX: 'auto', overflowY: 'hidden' }}>
           {tabs.filter(t => t.id !== 'home').map(tab => {
             const isActive = tab.id === activeTabId;
             return (
               <div
                 key={tab.id}
                 onClick={() => setActiveTabId(tab.id)}
-                style={{
-                  backgroundColor: isActive ? 'var(--bg-active-tab)' : 'transparent',
-                  borderColor: 'var(--border-color)',
-                  borderRight: '1px solid var(--border-color)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  paddingLeft: '16px',
-                  paddingRight: '14px',
-                  fontSize: '0.8rem',
-                  fontWeight: isActive ? 600 : 400,
-                  color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
-                  borderBottom: isActive ? '2px solid var(--accent-color)' : 'none',
-                  cursor: 'pointer',
-                  position: 'relative',
-                  whiteSpace: 'nowrap',
-                }}
+                className={`tab ${isActive ? 'is-active' : ''}`}
+                style={tabStyle(isActive)}
               >
-                {tab.type === 'folder' && <FolderOpen size={13} style={{ marginRight: '6px' }} />}
-                {tab.type === 'text' && <FileCode size={13} style={{ marginRight: '6px' }} />}
-                
-                <span style={{ maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {tab.type === 'folder' && <FolderOpen size={13} style={{ marginRight: '6px', flexShrink: 0 }} />}
+                {tab.type === 'text' && <FileCode size={13} style={{ marginRight: '6px', flexShrink: 0 }} />}
+
+                <span style={{ maxWidth: '160px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {tab.title}
                 </span>
-                
+
                 <button
                   onClick={(e) => closeTab(tab.id, e)}
-                  style={{
-                    border: 'none',
-                    background: 'transparent',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    marginLeft: '8px',
-                    padding: '2px',
-                    borderRadius: '4px',
-                    color: 'var(--text-muted)',
-                    opacity: 0.7,
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
-                  title="Close Tab"
+                  className="icon-btn tab-close"
+                  style={{ marginLeft: '6px', padding: '2px' }}
+                  title="Close"
                 >
                   <X size={12} />
                 </button>
@@ -132,52 +103,20 @@ export default function App() {
             );
           })}
 
-          {/* New Tab Buttons */}
-          <div style={{ display: 'flex', alignItems: 'center', paddingLeft: '10px', gap: '4px' }}>
-            <button
-              onClick={() => addTab('folder')}
-              title="New Folder Compare"
-              style={{
-                border: 'none',
-                background: 'transparent',
-                cursor: 'pointer',
-                padding: '6px',
-                borderRadius: '4px',
-                color: 'var(--text-secondary)',
-                display: 'flex',
-                alignItems: 'center',
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)')}
-              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-            >
-              <FolderOpen size={15} />
+          <div style={{ display: 'flex', alignItems: 'center', paddingLeft: '4px', gap: '2px' }}>
+            <button onClick={() => addTab('folder')} className="icon-btn" title="New Folder Compare">
+              <FolderOpen size={14} />
             </button>
-            <button
-              onClick={() => addTab('text')}
-              title="New Text Compare"
-              style={{
-                border: 'none',
-                background: 'transparent',
-                cursor: 'pointer',
-                padding: '6px',
-                borderRadius: '4px',
-                color: 'var(--text-secondary)',
-                display: 'flex',
-                alignItems: 'center',
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)')}
-              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-            >
-              <FileCode size={15} />
+            <button onClick={() => addTab('text')} className="icon-btn" title="New Text Compare">
+              <FileCode size={14} />
             </button>
           </div>
         </div>
       </header>
 
-      {/* Main Workspace */}
       <main style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
-        
-        {/* Render Tab Contents (Keep mounted, toggle display to preserve state) */}
+
+        {/* Keep every tab mounted and toggle display so state survives tab switches */}
         {tabs.map(tab => {
           const isActive = tab.id === activeTabId;
           return (
@@ -190,43 +129,24 @@ export default function App() {
               }}
             >
               {tab.type === 'home' && (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', padding: '32px' }}>
-                  <div className="glass-panel" style={{ padding: '48px', maxWidth: '600px', width: '100%', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <div style={{ padding: '16px', background: 'rgba(99, 102, 241, 0.1)', borderRadius: '16px', marginBottom: '24px', display: 'inline-flex', color: '#818cf8' }}>
-                      <Sparkles size={40} />
-                    </div>
-                    <h1 style={{ fontSize: '2rem', marginBottom: '8px', fontFamily: 'var(--font-display)', fontWeight: 800, letterSpacing: '-0.02em' }}>
-                      TinyDiff
-                    </h1>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '32px', lineHeight: 1.6, maxWidth: '420px' }}>
-                      High-performance Rust + Tauri v2 folder and file comparison utility. Scan directories, compare differences side-by-side, and synchronize files with precision.
-                    </p>
+                <div style={{ padding: '40px 48px', maxWidth: '560px' }}>
+                  <h1 style={{ fontSize: '1.4rem', fontWeight: 400, marginBottom: '4px' }}>TinyDiff</h1>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '28px' }}>
+                    Compare folders and files side by side.
+                  </p>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', width: '100%' }}>
-                      <button
-                        onClick={() => addTab('folder')}
-                        className="btn btn-primary"
-                        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px', gap: '12px', height: '100%' }}
-                      >
-                        <FolderOpen size={32} />
-                        <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>Folder Compare</div>
-                          <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.75)', marginTop: '4px' }}>Scan & sync directory trees</div>
-                        </div>
-                      </button>
-
-                      <button
-                        onClick={() => addTab('text')}
-                        className="btn"
-                        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px', gap: '12px', height: '100%' }}
-                      >
-                        <FileCode size={32} style={{ color: '#818cf8' }} />
-                        <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>Text Compare</div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px' }}>Line-by-line file diff & edit</div>
-                        </div>
-                      </button>
-                    </div>
+                  <h2 style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>Start</h2>
+                  <div style={{ display: 'flex', flexDirection: 'column', marginLeft: '-8px' }}>
+                    <button className="start-link" onClick={() => addTab('folder')}>
+                      <FolderOpen size={16} />
+                      <span>Folder Compare</span>
+                      <span className="start-link-desc">Two directories, copy and delete between them</span>
+                    </button>
+                    <button className="start-link" onClick={() => addTab('text')}>
+                      <FileCode size={16} />
+                      <span>Text Compare</span>
+                      <span className="start-link-desc">Two files, line by line, editable</span>
+                    </button>
                   </div>
                 </div>
               )}

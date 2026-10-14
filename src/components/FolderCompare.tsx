@@ -14,7 +14,6 @@ import {
   ChevronDown,
   Trash2,
   X,
-  Layers,
   Equal,
   Eye,
   EyeOff,
@@ -384,8 +383,8 @@ export default function FolderCompare({
       setSelectedPaths(new Set());
       setLastSelectedPath(null);
 
-      const dirLabel = direction === 'left-to-right' ? 'Left ➔ Right' : 'Right ➔ Left';
-      setSyncSuccessMsg(`Copied "${row.name}" (${dirLabel}) successfully`);
+      const dirLabel = direction === 'left-to-right' ? 'left → right' : 'right → left';
+      setSyncSuccessMsg(`Copied "${row.name}" (${dirLabel})`);
       setTimeout(() => setSyncSuccessMsg(null), 3000);
     } catch (err: any) {
       setError(`Sync failed: ${err?.message || String(err)}`);
@@ -422,14 +421,14 @@ export default function FolderCompare({
         const dest = direction === 'left-to-right' ? row.rightFullPath : row.leftFullPath;
         await api.copyFile(src, dest);
         copiedCount++;
-        setSyncSuccessMsg(`Copying files (${copiedCount}/${eligibleRows.length})...`);
+        setSyncSuccessMsg(`Copying files (${copiedCount}/${eligibleRows.length})…`);
       }
 
       await runCompare(true);
       setSelectedPaths(new Set());
       setLastSelectedPath(null);
-      const dirLabel = direction === 'left-to-right' ? 'Left ➔ Right' : 'Right ➔ Left';
-      setSyncSuccessMsg(`Copied ${copiedCount} files (${dirLabel}) successfully.`);
+      const dirLabel = direction === 'left-to-right' ? 'left → right' : 'right → left';
+      setSyncSuccessMsg(`Copied ${copiedCount} files (${dirLabel})`);
       setTimeout(() => setSyncSuccessMsg(null), 3500);
     } catch (err: any) {
       setError(`Batch sync failed after copying ${copiedCount} files: ${err?.message || String(err)}`);
@@ -443,7 +442,7 @@ export default function FolderCompare({
     try {
       setLoading(true);
       await api.deleteItem(deleteConfirmTarget.path);
-      setSyncSuccessMsg(`"${deleteConfirmTarget.name}" deleted successfully.`);
+      setSyncSuccessMsg(`Deleted "${deleteConfirmTarget.name}"`);
       setTimeout(() => setSyncSuccessMsg(null), 3000);
       setDeleteConfirmTarget(null);
       setSelectedPaths(new Set());
@@ -465,7 +464,7 @@ export default function FolderCompare({
         await api.deleteItem(target.path);
         deletedCount++;
       }
-      setSyncSuccessMsg(`Deleted ${deletedCount} items successfully.`);
+      setSyncSuccessMsg(`Deleted ${deletedCount} items`);
       setTimeout(() => setSyncSuccessMsg(null), 3500);
       setSelectedPaths(new Set());
       setDeleteConfirmTargetBatch(null);
@@ -683,43 +682,19 @@ export default function FolderCompare({
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '12px 16px', position: 'relative' }}>
-      {/* Bottom Center Floating Progress & Toast */}
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '8px', position: 'relative' }}>
       {(syncingState || syncSuccessMsg) && (
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '24px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 1000,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            padding: '10px 22px',
-            borderRadius: '30px',
-            background: syncingState ? 'rgba(15, 23, 42, 0.94)' : 'rgba(6, 78, 59, 0.94)',
-            border: syncingState ? '1px solid rgba(99, 102, 241, 0.7)' : '1px solid rgba(52, 211, 153, 0.7)',
-            boxShadow: syncingState
-              ? '0 12px 30px -5px rgba(99, 102, 241, 0.5), 0 0 20px rgba(99, 102, 241, 0.3)'
-              : '0 12px 30px -5px rgba(16, 185, 129, 0.5), 0 0 20px rgba(16, 185, 129, 0.3)',
-            backdropFilter: 'blur(12px)',
-            color: 'white',
-            fontSize: '0.85rem',
-            fontWeight: 600,
-            pointerEvents: 'auto',
-          }}
-        >
+        <div className={`status-toast ${syncingState ? 'is-busy' : ''}`}>
           {syncingState ? (
             <>
-              <RefreshCw size={16} className="animate-spin" style={{ color: '#818cf8' }} />
+              <RefreshCw size={13} className="animate-spin" style={{ color: 'var(--text-secondary)' }} />
               <span>
-                Copying "{syncingState.name}" ({syncingState.direction === 'left-to-right' ? 'Left ➔ Right' : 'Right ➔ Left'})...
+                Copying "{syncingState.name}" ({syncingState.direction === 'left-to-right' ? 'left → right' : 'right → left'})…
               </span>
             </>
           ) : (
             <>
-              <Check size={16} style={{ color: '#34d399' }} />
+              <Check size={13} style={{ color: 'var(--success)' }} />
               <span>{syncSuccessMsg}</span>
             </>
           )}
@@ -727,49 +702,47 @@ export default function FolderCompare({
       )}
 
       {/* Path Input Bar */}
-      <div className="glass-panel" style={{ padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '10px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           {/* Left Folder Input */}
-          <div style={{ flex: 1, display: 'flex', gap: '8px' }}>
+          <div style={{ flex: 1, display: 'flex', gap: '4px' }}>
             <input
               type="text"
               className="input-field"
-              placeholder="Left Folder Path"
+              placeholder="Left folder"
               value={leftPath}
               list="left-folder-history-list"
               onChange={(e) => setLeftPath(e.target.value)}
-              style={{ flex: 1, height: '34px', padding: '6px 10px', fontSize: '0.8rem' }}
+              style={{ flex: 1, height: '28px' }}
             />
             <datalist id="left-folder-history-list">
               {leftHistory.map((item, idx) => (
                 <option key={idx} value={item} />
               ))}
             </datalist>
-            <button className="btn" onClick={selectLeftFolder} style={{ height: '34px', padding: '0 10px', fontSize: '0.8rem' }} title="Browse Left Folder">
-              <FolderOpen size={15} />
+            <button className="btn" onClick={selectLeftFolder} style={{ height: '28px', padding: '0 8px' }} title="Browse Left Folder">
+              <FolderOpen size={14} />
             </button>
           </div>
 
-          <ArrowRight size={16} style={{ color: 'var(--text-muted)' }} />
-
           {/* Right Folder Input */}
-          <div style={{ flex: 1, display: 'flex', gap: '8px' }}>
+          <div style={{ flex: 1, display: 'flex', gap: '4px' }}>
             <input
               type="text"
               className="input-field"
-              placeholder="Right Folder Path"
+              placeholder="Right folder"
               value={rightPath}
               list="right-folder-history-list"
               onChange={(e) => setRightPath(e.target.value)}
-              style={{ flex: 1, height: '34px', padding: '6px 10px', fontSize: '0.8rem' }}
+              style={{ flex: 1, height: '28px' }}
             />
             <datalist id="right-folder-history-list">
               {rightHistory.map((item, idx) => (
                 <option key={idx} value={item} />
               ))}
             </datalist>
-            <button className="btn" onClick={selectRightFolder} style={{ height: '34px', padding: '0 10px', fontSize: '0.8rem' }} title="Browse Right Folder">
-              <FolderOpen size={15} />
+            <button className="btn" onClick={selectRightFolder} style={{ height: '28px', padding: '0 8px' }} title="Browse Right Folder">
+              <FolderOpen size={14} />
             </button>
           </div>
 
@@ -778,9 +751,9 @@ export default function FolderCompare({
             className="btn btn-primary"
             onClick={() => runCompare(false)}
             disabled={loading}
-            style={{ height: '34px', paddingLeft: '16px', paddingRight: '16px', fontSize: '0.8rem' }}
+            style={{ height: '28px' }}
           >
-            {loading ? <RefreshCw size={14} className="animate-spin" /> : <GitCompare size={14} />}
+            {loading && <RefreshCw size={13} className="animate-spin" />}
             Compare
           </button>
 
@@ -789,16 +762,16 @@ export default function FolderCompare({
             className="btn"
             onClick={() => runCompare(true)}
             disabled={loading || !leftPath || !rightPath}
-            style={{ height: '34px', padding: '0 10px', fontSize: '0.8rem', display: 'flex', alignItems: 'center' }}
-            title="Refresh directory comparison (F5 / Ctrl+R)"
+            style={{ height: '28px', padding: '0 8px' }}
+            title="Refresh (F5)"
           >
-            <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
+            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
           </button>
         </div>
 
         {error && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#ef4444', fontSize: '0.85rem' }}>
-            <AlertCircle size={14} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--st-newer)', fontSize: '0.8rem' }}>
+            <AlertCircle size={13} />
             <span>{error}</span>
           </div>
         )}
@@ -807,101 +780,70 @@ export default function FolderCompare({
       {/* Toolbar / Filters / Bulk Action Bar */}
       {rows.length > 0 && (
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-          {/* Filter Buttons */}
-          <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-            <button
-              onClick={() => setFilter('all')}
-              className={`btn ${filter === 'all' ? 'btn-primary' : ''}`}
-              style={{ padding: '4px 10px', fontSize: '0.75rem' }}
-              title="All Files"
-            >
-              <Layers size={14} />
-              All
-            </button>
-            <button
-              onClick={() => setFilter('diff')}
-              className={`btn ${filter === 'diff' ? 'btn-primary' : ''}`}
-              style={{ padding: '4px 10px', fontSize: '0.75rem', color: filter === 'diff' ? 'white' : '#ef4444' }}
-              title="Differences"
-            >
-              <GitCompare size={14} />
-            </button>
-            <button
-              onClick={() => setFilter('same')}
-              className={`btn ${filter === 'same' ? 'btn-primary' : ''}`}
-              style={{ padding: '4px 10px', fontSize: '0.75rem', color: filter === 'same' ? 'white' : 'var(--text-secondary)' }}
-              title="Identical"
-            >
-              <Equal size={14} />
-            </button>
-            <button
-              onClick={() => setFilter('leftOnly')}
-              className={`btn ${filter === 'leftOnly' ? 'btn-primary' : ''}`}
-              style={{ padding: '4px 10px', fontSize: '0.75rem', color: filter === 'leftOnly' ? 'white' : '#9ca3af' }}
-              title="Left Only"
-            >
-              <ArrowLeft size={14} />
-            </button>
-            <button
-              onClick={() => setFilter('rightOnly')}
-              className={`btn ${filter === 'rightOnly' ? 'btn-primary' : ''}`}
-              style={{ padding: '4px 10px', fontSize: '0.75rem', color: filter === 'rightOnly' ? 'white' : '#9ca3af' }}
-              title="Right Only"
-            >
-              <ArrowRight size={14} />
-            </button>
-            <div style={{ width: '1px', height: '16px', background: 'var(--border-color)', margin: '0 2px' }} />
-            <button
-              onClick={() => runCompare(true)}
-              className="btn"
-              disabled={loading}
-              style={{ padding: '4px 8px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', color: 'var(--text-secondary)' }}
-              title="Refresh directory comparison (F5 / Ctrl+R)"
-            >
-              <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
-            </button>
-            <div style={{ width: '1px', height: '16px', background: 'var(--border-color)', margin: '0 2px' }} />
-            <button
-              onClick={() => setShowHidden((prev) => !prev)}
-              className={`btn ${showHidden ? 'btn-primary' : ''}`}
-              style={{ padding: '4px 10px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px', color: showHidden ? 'white' : 'var(--text-secondary)' }}
-              title={showHidden ? '숨김 파일 숨김' : '숨김 파일 표시 중'}
-            >
-              {showHidden ? <Eye size={14} /> : <EyeOff size={14} />}
-              <span>{showHidden ? '숨김 파일 표시 중' : '숨김 파일 숨김'}</span>
-            </button>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <div className="segmented">
+              <button onClick={() => setFilter('all')} className={filter === 'all' ? 'is-active' : ''} title="All files">
+                All
+              </button>
+              <button onClick={() => setFilter('diff')} className={filter === 'diff' ? 'is-active' : ''} title="Differences only">
+                <GitCompare size={12} />
+                Diffs
+              </button>
+              <button onClick={() => setFilter('same')} className={filter === 'same' ? 'is-active' : ''} title="Identical only">
+                <Equal size={12} />
+                Same
+              </button>
+              <button onClick={() => setFilter('leftOnly')} className={filter === 'leftOnly' ? 'is-active' : ''} title="Left only">
+                <ArrowLeft size={12} />
+                Left only
+              </button>
+              <button onClick={() => setFilter('rightOnly')} className={filter === 'rightOnly' ? 'is-active' : ''} title="Right only">
+                <ArrowRight size={12} />
+                Right only
+              </button>
+            </div>
+            <div className="segmented">
+              <button
+                onClick={() => setShowHidden((prev) => !prev)}
+                className={showHidden ? 'is-active' : ''}
+                title="숨김 파일 표시"
+              >
+                {showHidden ? <Eye size={12} /> : <EyeOff size={12} />}
+                숨김 파일
+              </button>
+            </div>
           </div>
 
           {/* Bulk Action Bar */}
           {selectedPaths.size > 1 && !syncingState && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(99, 102, 241, 0.15)', border: '1px solid rgba(99, 102, 241, 0.35)', borderRadius: '6px', padding: '3px 10px' }}>
-              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#a5b4fc' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginRight: '2px' }}>
                 {selectedPaths.size} selected
               </span>
               <button
                 className="btn"
                 onClick={() => handleSyncBatch('left-to-right')}
                 disabled={!!syncingState}
-                style={{ padding: '2px 8px', fontSize: '0.75rem', background: '#6366f1', borderColor: '#6366f1', color: 'white', height: '24px' }}
+                style={{ padding: '0 8px', fontSize: '0.75rem', height: '24px' }}
                 title="Copy all selected left files to right"
               >
                 <ArrowRight size={12} />
-                Copy Left ➔ Right
+                Copy to right
               </button>
               <button
                 className="btn"
                 onClick={() => handleSyncBatch('right-to-left')}
                 disabled={!!syncingState}
-                style={{ padding: '2px 8px', fontSize: '0.75rem', background: '#6366f1', borderColor: '#6366f1', color: 'white', height: '24px' }}
+                style={{ padding: '0 8px', fontSize: '0.75rem', height: '24px' }}
                 title="Copy all selected right files to left"
               >
-                <ArrowRight size={12} style={{ transform: 'rotate(180deg)' }} />
-                Copy Right ➔ Left
+                <ArrowLeft size={12} />
+                Copy to left
               </button>
               <button
                 className="btn"
                 onClick={handleDeleteSelected}
-                style={{ padding: '2px 8px', fontSize: '0.75rem', background: 'rgba(239, 68, 68, 0.2)', borderColor: '#ef4444', color: '#f87171', height: '24px' }}
+                style={{ padding: '0 8px', fontSize: '0.75rem', height: '24px' }}
                 title="Delete all selected files/folders (Delete)"
               >
                 <Trash2 size={12} />
@@ -909,7 +851,7 @@ export default function FolderCompare({
               </button>
               <button
                 onClick={() => setSelectedPaths(new Set())}
-                style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '2px', marginLeft: '4px' }}
+                className="icon-btn"
                 title="Clear selection (Esc)"
               >
                 <X size={14} />
@@ -917,27 +859,26 @@ export default function FolderCompare({
             </div>
           )}
 
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-            Double click a file to open file comparison
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+            Double-click a file to compare its contents
           </div>
         </div>
       )}
 
       {/* Main Grid View */}
-      <div className="glass-panel" style={{ flex: 1, overflow: 'hidden', borderRadius: '8px', display: 'flex', flexDirection: 'column' }}>
+      <div className="panel" style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         {rows.length === 0 ? (
-          <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', gap: '8px', padding: '48px' }}>
-            <FolderOpen size={48} style={{ strokeWidth: 1.5 }} />
-            <span>Select folders and click Compare to list files.</span>
+          <div style={{ padding: '16px', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+            <span>Pick two folders and press Compare.</span>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
             {/* Headers */}
-            <div style={{ display: 'flex', background: 'rgba(0,0,0,0.25)', borderBottom: '1px solid var(--border-color)', fontWeight: 600, color: 'var(--text-secondary)', fontSize: '0.8rem', userSelect: 'none' }}>
+            <div style={{ display: 'flex', background: 'var(--bg-header)', borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)', fontSize: '0.75rem', userSelect: 'none' }}>
               {/* Left Header */}
               <div style={{ flex: '1', display: 'grid', gridTemplateColumns: gridLayout, padding: '0 12px', position: 'relative' }}>
-                <div style={{ padding: '10px 8px 10px 0', position: 'relative', display: 'flex', alignItems: 'center', minWidth: 0 }}>
-                  <span style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>Left Folder Contents</span>
+                <div style={{ padding: '5px 8px 5px 0', position: 'relative', display: 'flex', alignItems: 'center', minWidth: 0 }}>
+                  <span style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>Left</span>
                   <div
                     className={`column-resizer column-resizer-right ${resizing === 'size' ? 'is-resizing' : ''}`}
                     onMouseDown={(e) => startResize('size', e)}
@@ -945,7 +886,7 @@ export default function FolderCompare({
                     title="Drag to resize Size column (Double-click to reset)"
                   />
                 </div>
-                <div style={{ padding: '10px 8px 10px 0', textAlign: 'right', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', minWidth: 0 }}>
+                <div style={{ padding: '5px 8px 5px 0', textAlign: 'right', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', minWidth: 0 }}>
                   <span style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>Size</span>
                   <div
                     className={`column-resizer column-resizer-right ${resizing === 'modified' ? 'is-resizing' : ''}`}
@@ -954,20 +895,18 @@ export default function FolderCompare({
                     title="Drag to resize Modified column (Double-click to reset)"
                   />
                 </div>
-                <div style={{ padding: '10px 0 10px 16px', display: 'flex', alignItems: 'center', minWidth: 0 }}>
+                <div style={{ padding: '5px 0 5px 16px', display: 'flex', alignItems: 'center', minWidth: 0 }}>
                   <span style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>Modified</span>
                 </div>
               </div>
 
               {/* Sync Header */}
-              <div style={{ width: '54px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderLeft: '1px solid var(--border-color)', borderRight: '1px solid var(--border-color)', background: 'rgba(0,0,0,0.1)' }}>
-                Sync
-              </div>
+              <div style={{ width: '54px', borderLeft: '1px solid var(--border-color)', borderRight: '1px solid var(--border-color)' }} />
 
               {/* Right Header */}
               <div style={{ flex: '1', display: 'grid', gridTemplateColumns: gridLayout, padding: '0 12px', position: 'relative' }}>
-                <div style={{ padding: '10px 8px 10px 0', position: 'relative', display: 'flex', alignItems: 'center', minWidth: 0 }}>
-                  <span style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>Right Folder Contents</span>
+                <div style={{ padding: '5px 8px 5px 0', position: 'relative', display: 'flex', alignItems: 'center', minWidth: 0 }}>
+                  <span style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>Right</span>
                   <div
                     className={`column-resizer column-resizer-right ${resizing === 'size' ? 'is-resizing' : ''}`}
                     onMouseDown={(e) => startResize('size', e)}
@@ -975,7 +914,7 @@ export default function FolderCompare({
                     title="Drag to resize Size column (Double-click to reset)"
                   />
                 </div>
-                <div style={{ padding: '10px 8px 10px 0', textAlign: 'right', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', minWidth: 0 }}>
+                <div style={{ padding: '5px 8px 5px 0', textAlign: 'right', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', minWidth: 0 }}>
                   <span style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>Size</span>
                   <div
                     className={`column-resizer column-resizer-right ${resizing === 'modified' ? 'is-resizing' : ''}`}
@@ -984,7 +923,7 @@ export default function FolderCompare({
                     title="Drag to resize Modified column (Double-click to reset)"
                   />
                 </div>
-                <div style={{ padding: '10px 0 10px 16px', display: 'flex', alignItems: 'center', minWidth: 0 }}>
+                <div style={{ padding: '5px 0 5px 16px', display: 'flex', alignItems: 'center', minWidth: 0 }}>
                   <span style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>Modified</span>
                 </div>
               </div>
@@ -993,12 +932,11 @@ export default function FolderCompare({
             {/* List Body */}
             <div style={{ flex: 1, overflowY: 'auto' }}>
               {filteredRows.length === 0 ? (
-                <div style={{ padding: '48px 16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-                  <FolderOpen size={32} style={{ opacity: 0.5 }} />
+                <div style={{ padding: '16px', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
                   <span>
                     {filter === 'all'
-                      ? 'No items to show. Click a folder in the list to expand.'
-                      : `No items match the current filter ("${filter}").`}
+                      ? 'Nothing to show.'
+                      : 'No items match this filter.'}
                   </span>
                 </div>
               ) : (
@@ -1006,8 +944,8 @@ export default function FolderCompare({
                   {filteredRows.map((row) => {
                     const isSelected = selectedPaths.has(row.relativePath);
 
-                    const leftBg = isSelected ? 'rgba(99, 102, 241, 0.22)' : 'transparent';
-                    const rightBg = isSelected ? 'rgba(99, 102, 241, 0.22)' : 'transparent';
+                    const leftBg = isSelected ? 'var(--bg-selection)' : 'transparent';
+                    const rightBg = isSelected ? 'var(--bg-selection)' : 'transparent';
 
                     let leftTextColor = 'var(--text-primary)';
                     let leftIconColor = 'var(--text-secondary)';
@@ -1018,27 +956,27 @@ export default function FolderCompare({
                       const dirStatus = dirStatusMap.get(row.relativePath);
                       if (row.leftExists) {
                         if (dirStatus?.leftHasNewer) {
-                          leftTextColor = '#ef4444';
-                          leftIconColor = '#ef4444';
+                          leftTextColor = 'var(--st-newer)';
+                          leftIconColor = 'var(--st-newer)';
                         } else if (dirStatus?.leftHasOnly) {
-                          leftTextColor = '#60a5fa';
-                          leftIconColor = '#60a5fa';
+                          leftTextColor = 'var(--st-orphan)';
+                          leftIconColor = 'var(--st-orphan)';
                         } else {
-                          leftTextColor = '#9ca3af';
-                          leftIconColor = '#9ca3af';
+                          leftTextColor = 'var(--st-older)';
+                          leftIconColor = 'var(--st-older)';
                         }
                       }
 
                       if (row.rightExists) {
                         if (dirStatus?.rightHasNewer) {
-                          rightTextColor = '#ef4444';
-                          rightIconColor = '#ef4444';
+                          rightTextColor = 'var(--st-newer)';
+                          rightIconColor = 'var(--st-newer)';
                         } else if (dirStatus?.rightHasOnly) {
-                          rightTextColor = '#60a5fa';
-                          rightIconColor = '#60a5fa';
+                          rightTextColor = 'var(--st-orphan)';
+                          rightIconColor = 'var(--st-orphan)';
                         } else {
-                          rightTextColor = '#9ca3af';
-                          rightIconColor = '#9ca3af';
+                          rightTextColor = 'var(--st-older)';
+                          rightIconColor = 'var(--st-older)';
                         }
                       }
                     } else {
@@ -1049,33 +987,33 @@ export default function FolderCompare({
 
                         if (isTimeDiff) {
                           if (row.leftMtime > row.rightMtime) {
-                            leftTextColor = '#ef4444';
-                            leftIconColor = '#ef4444';
-                            rightTextColor = '#9ca3af';
-                            rightIconColor = '#9ca3af';
+                            leftTextColor = 'var(--st-newer)';
+                            leftIconColor = 'var(--st-newer)';
+                            rightTextColor = 'var(--st-older)';
+                            rightIconColor = 'var(--st-older)';
                           } else {
-                            leftTextColor = '#9ca3af';
-                            leftIconColor = '#9ca3af';
-                            rightTextColor = '#ef4444';
-                            rightIconColor = '#ef4444';
+                            leftTextColor = 'var(--st-older)';
+                            leftIconColor = 'var(--st-older)';
+                            rightTextColor = 'var(--st-newer)';
+                            rightIconColor = 'var(--st-newer)';
                           }
                         } else if (isSizeDiff) {
-                          leftTextColor = '#ef4444';
-                          leftIconColor = '#ef4444';
-                          rightTextColor = '#ef4444';
-                          rightIconColor = '#ef4444';
+                          leftTextColor = 'var(--st-newer)';
+                          leftIconColor = 'var(--st-newer)';
+                          rightTextColor = 'var(--st-newer)';
+                          rightIconColor = 'var(--st-newer)';
                         } else {
                           leftTextColor = 'var(--text-primary)';
-                          leftIconColor = '#9ca3af';
+                          leftIconColor = 'var(--st-older)';
                           rightTextColor = 'var(--text-primary)';
-                          rightIconColor = '#9ca3af';
+                          rightIconColor = 'var(--st-older)';
                         }
                       } else if (row.leftExists) {
-                        leftTextColor = '#60a5fa';
-                        leftIconColor = '#60a5fa';
+                        leftTextColor = 'var(--st-orphan)';
+                        leftIconColor = 'var(--st-orphan)';
                       } else if (row.rightExists) {
-                        rightTextColor = '#60a5fa';
-                        rightIconColor = '#60a5fa';
+                        rightTextColor = 'var(--st-orphan)';
+                        rightIconColor = 'var(--st-orphan)';
                       }
                     }
 
@@ -1092,11 +1030,10 @@ export default function FolderCompare({
                         }}
                         style={{
                           display: 'flex',
-                          borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+                          borderBottom: '1px solid var(--border-subtle)',
                           fontSize: '0.8rem',
-                          fontFamily: 'var(--font-mono)',
+                          fontVariantNumeric: 'tabular-nums',
                           cursor: 'pointer',
-                          boxShadow: isSelected ? 'inset 0 0 0 1px #6366f1' : 'none',
                           opacity: row.isHidden ? 0.65 : 1,
                         }}
                       >
@@ -1136,12 +1073,12 @@ export default function FolderCompare({
                                   alignItems: 'center',
                                   paddingLeft: `${row.depth * 16}px`,
                                   color: leftTextColor,
-                                  fontWeight: row.isDirectory ? 600 : 400,
+                                  fontWeight: 400,
                                   overflow: 'hidden',
                                   whiteSpace: 'nowrap',
                                   textOverflow: 'ellipsis',
                                   minWidth: 0,
-                                  height: '28px',
+                                  height: '24px',
                                 }}
                               >
                                 {row.isDirectory ? (
@@ -1179,7 +1116,7 @@ export default function FolderCompare({
                               </div>
                             </>
                           ) : (
-                            <div style={{ height: '28px' }} />
+                            <div style={{ height: '24px' }} />
                           )}
                         </div>
 
@@ -1193,7 +1130,7 @@ export default function FolderCompare({
                             gap: '4px',
                             borderLeft: '1px solid var(--border-color)',
                             borderRight: '1px solid var(--border-color)',
-                            background: isSelected ? 'rgba(99, 102, 241, 0.22)' : 'rgba(0,0,0,0.1)',
+                            background: isSelected ? 'var(--bg-selection)' : 'var(--bg-gutter)',
                           }}
                         >
                           {!row.isDirectory && (
@@ -1206,17 +1143,8 @@ export default function FolderCompare({
                                   }}
                                   disabled={!!syncingState}
                                   title="Copy Left to Right"
-                                  style={{
-                                    border: 'none',
-                                    background: 'transparent',
-                                    color: 'var(--text-muted)',
-                                    cursor: 'pointer',
-                                    padding: '2px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                  }}
-                                  onMouseEnter={(e) => (e.currentTarget.style.color = '#818cf8')}
-                                  onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
+                                  className="icon-btn"
+                                  style={{ padding: '2px' }}
                                 >
                                   <ArrowRight size={13} />
                                 </button>
@@ -1229,19 +1157,10 @@ export default function FolderCompare({
                                   }}
                                   disabled={!!syncingState}
                                   title="Copy Right to Left"
-                                  style={{
-                                    border: 'none',
-                                    background: 'transparent',
-                                    color: 'var(--text-muted)',
-                                    cursor: 'pointer',
-                                    padding: '2px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                  }}
-                                  onMouseEnter={(e) => (e.currentTarget.style.color = '#818cf8')}
-                                  onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
+                                  className="icon-btn"
+                                  style={{ padding: '2px' }}
                                 >
-                                  <ArrowRight size={13} style={{ transform: 'rotate(180deg)' }} />
+                                  <ArrowLeft size={13} />
                                 </button>
                               )}
                             </>
@@ -1284,12 +1203,12 @@ export default function FolderCompare({
                                   alignItems: 'center',
                                   paddingLeft: `${row.depth * 16}px`,
                                   color: rightTextColor,
-                                  fontWeight: row.isDirectory ? 600 : 400,
+                                  fontWeight: 400,
                                   overflow: 'hidden',
                                   whiteSpace: 'nowrap',
                                   textOverflow: 'ellipsis',
                                   minWidth: 0,
-                                  height: '28px',
+                                  height: '24px',
                                 }}
                               >
                                 {row.isDirectory ? (
@@ -1327,7 +1246,7 @@ export default function FolderCompare({
                               </div>
                             </>
                           ) : (
-                            <div style={{ height: '28px' }} />
+                            <div style={{ height: '24px' }} />
                           )}
                         </div>
                       </div>
@@ -1350,23 +1269,23 @@ export default function FolderCompare({
             zIndex: 100,
             background: 'var(--bg-panel-solid)',
             border: '1px solid var(--border-color)',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
-            borderRadius: '6px',
-            padding: '4px',
-            minWidth: '190px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.45)',
+            borderRadius: '2px',
+            padding: '4px 0',
+            minWidth: '200px',
           }}
           onClick={(e) => e.stopPropagation()}
         >
-          <div style={{ padding: '6px 10px', fontSize: '0.75rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '120px' }}>
+          <div style={{ padding: '4px 10px 6px', fontSize: '0.75rem', color: 'var(--text-secondary)', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '150px' }}>
               {selectedPaths.size > 1 ? `${selectedPaths.size} items selected` : contextMenu.row.name}
             </span>
-            <span style={{ fontSize: '0.7rem', padding: '1px 5px', borderRadius: '4px', background: 'rgba(99, 102, 241, 0.2)', color: '#a5b4fc', textTransform: 'capitalize' }}>
-              {contextMenu.side}
+            <span style={{ color: 'var(--text-muted)' }}>
+              {contextMenu.side === 'left' ? 'Left' : 'Right'}
             </span>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '4px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', marginTop: '4px' }}>
             {!contextMenu.row.isDirectory && selectedPaths.size <= 1 && (
               <button
                 className="btn-menu-item"
@@ -1375,8 +1294,8 @@ export default function FolderCompare({
                   setContextMenu(null);
                 }}
               >
-                <FileCode size={14} style={{ color: '#818cf8' }} />
-                <span>Open File Compare</span>
+                <FileCode size={14} />
+                <span>Compare Contents</span>
               </button>
             )}
 
@@ -1404,7 +1323,7 @@ export default function FolderCompare({
               }}
               disabled={!!syncingState}
             >
-              <ArrowRight size={14} style={contextMenu.side === 'right' ? { transform: 'rotate(180deg)' } : {}} />
+              {contextMenu.side === 'left' ? <ArrowRight size={14} /> : <ArrowLeft size={14} />}
               <span>
                 Copy {selectedPaths.size > 1 ? `${selectedPaths.size} items` : ''} to {contextMenu.side === 'left' ? 'Right' : 'Left'}
               </span>
@@ -1414,19 +1333,19 @@ export default function FolderCompare({
               className="btn-menu-item"
               onClick={() => {
                 navigator.clipboard.writeText(contextMenu.targetPath);
-                setSyncSuccessMsg('Path copied to clipboard');
+                setSyncSuccessMsg('Path copied');
                 setTimeout(() => setSyncSuccessMsg(null), 2500);
                 setContextMenu(null);
               }}
             >
               <Copy size={14} />
-              <span>Copy Path(s)</span>
+              <span>Copy Path</span>
             </button>
 
             <div style={{ height: '1px', background: 'var(--border-color)', margin: '4px 0' }} />
 
             <button
-              className="btn-menu-item btn-menu-danger"
+              className="btn-menu-item"
               onClick={() => {
                 if (selectedPaths.size > 1) {
                   handleDeleteSelected();
@@ -1443,132 +1362,67 @@ export default function FolderCompare({
             >
               <Trash2 size={14} />
               <span>
-                Delete {selectedPaths.size > 1 ? `${selectedPaths.size} Items` : contextMenu.row.isDirectory ? 'Folder' : 'File'}
+                Delete {selectedPaths.size > 1 ? `${selectedPaths.size} items` : contextMenu.row.isDirectory ? 'folder' : 'file'}…
               </span>
             </button>
           </div>
         </div>
       )}
 
-      {/* Delete Confirmation Modal (Single) */}
       {deleteConfirmTarget && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 1100,
-            background: 'rgba(0, 0, 0, 0.7)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-          onClick={() => setDeleteConfirmTarget(null)}
-        >
-          <div
-            className="glass-panel"
-            style={{
-              padding: '24px',
-              maxWidth: '420px',
-              width: '90%',
-              background: 'var(--bg-panel-solid)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              boxShadow: '0 20px 50px rgba(0,0,0,0.8)',
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px', color: '#ef4444' }}>
-              <div style={{ padding: '8px', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '8px' }}>
-                <Trash2 size={24} />
-              </div>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Delete {deleteConfirmTarget.isDirectory ? 'Folder' : 'File'}</h3>
-            </div>
+        <div className="modal-backdrop" onClick={() => setDeleteConfirmTarget(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Delete {deleteConfirmTarget.isDirectory ? 'folder' : 'file'}?</h3>
 
-            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '16px' }}>
-              Are you sure you want to delete <strong style={{ color: 'var(--text-primary)' }}>"{deleteConfirmTarget.name}"</strong>? This action cannot be undone.
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '10px' }}>
+              <span style={{ color: 'var(--text-primary)' }}>{deleteConfirmTarget.name}</span> will be permanently deleted.
             </p>
 
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', background: 'rgba(0,0,0,0.3)', padding: '8px 12px', borderRadius: '6px', marginBottom: '20px', wordBreak: 'break-all' }}>
+            <div style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', marginBottom: '16px', wordBreak: 'break-all', userSelect: 'text' }}>
               {deleteConfirmTarget.path}
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
               <button className="btn" onClick={() => setDeleteConfirmTarget(null)}>
-                Cancel (Esc)
+                Cancel
               </button>
-              <button
-                className="btn"
-                onClick={handleDeleteItem}
-                style={{ background: '#ef4444', borderColor: '#ef4444', color: 'white', fontWeight: 600 }}
-              >
-                Delete (Enter)
+              <button className="btn btn-danger" onClick={handleDeleteItem}>
+                Delete
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Delete Confirmation Modal (Batch) */}
       {deleteConfirmTargetBatch && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 1100,
-            background: 'rgba(0, 0, 0, 0.7)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-          onClick={() => setDeleteConfirmTargetBatch(null)}
-        >
-          <div
-            className="glass-panel"
-            style={{
-              padding: '24px',
-              maxWidth: '460px',
-              width: '90%',
-              background: 'var(--bg-panel-solid)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              boxShadow: '0 20px 50px rgba(0,0,0,0.8)',
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px', color: '#ef4444' }}>
-              <div style={{ padding: '8px', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '8px' }}>
-                <Trash2 size={24} />
-              </div>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Delete {deleteConfirmTargetBatch.length} Selected Items</h3>
-            </div>
+        <div className="modal-backdrop" onClick={() => setDeleteConfirmTargetBatch(null)}>
+          <div className="modal" style={{ maxWidth: '460px' }} onClick={(e) => e.stopPropagation()}>
+            <h3>Delete {deleteConfirmTargetBatch.length} items?</h3>
 
-            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '14px' }}>
-              Are you sure you want to permanently delete these <strong style={{ color: 'var(--text-primary)' }}>{deleteConfirmTargetBatch.length} items</strong>?
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '10px' }}>
+              These will be permanently deleted.
             </p>
 
-            <div style={{ maxHeight: '140px', overflowY: 'auto', background: 'rgba(0,0,0,0.3)', padding: '8px 12px', borderRadius: '6px', marginBottom: '20px', fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <div style={{ maxHeight: '140px', overflowY: 'auto', border: '1px solid var(--border-color)', background: 'var(--bg-app)', padding: '6px 8px', marginBottom: '16px', fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '2px' }}>
               {deleteConfirmTargetBatch.slice(0, 10).map((t, idx) => (
                 <div key={idx} style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  • {t.name}
+                  <span style={{ color: 'var(--text-muted)', marginRight: '8px' }}>{t.side === 'left' ? 'L' : 'R'}</span>
+                  {t.name}
                 </div>
               ))}
               {deleteConfirmTargetBatch.length > 10 && (
-                <div style={{ color: 'var(--text-muted)', fontStyle: 'italic', marginTop: '2px' }}>
-                  ...and {deleteConfirmTargetBatch.length - 10} more items
+                <div style={{ color: 'var(--text-muted)', marginTop: '2px' }}>
+                  and {deleteConfirmTargetBatch.length - 10} more
                 </div>
               )}
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
               <button className="btn" onClick={() => setDeleteConfirmTargetBatch(null)}>
-                Cancel (Esc)
+                Cancel
               </button>
-              <button
-                className="btn"
-                onClick={handleBatchDelete}
-                style={{ background: '#ef4444', borderColor: '#ef4444', color: 'white', fontWeight: 600 }}
-              >
-                Delete All (Enter)
+              <button className="btn btn-danger" onClick={handleBatchDelete}>
+                Delete
               </button>
             </div>
           </div>

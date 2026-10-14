@@ -1,16 +1,12 @@
 import { useState, useEffect, useRef, useMemo, Fragment } from 'react';
 import {
-  FileText,
   FolderOpen,
   Save,
   RefreshCw,
   AlertCircle,
-  ArrowLeftRight,
   Check,
   ChevronLeft,
   ChevronRight,
-  Layers,
-  GitCompare,
 } from 'lucide-react';
 import { api, DiffRow } from '../api';
 
@@ -274,68 +270,44 @@ export default function TextCompare({
   }, [leftPath, rightPath, isLeftDirty, isRightDirty, diffRows]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '12px 16px', position: 'relative' }}>
-      {/* Bottom Center Toast Notification Overlay */}
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '8px', position: 'relative' }}>
       {saveSuccessMsg && (
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '24px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 1000,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            padding: '10px 22px',
-            borderRadius: '30px',
-            background: 'rgba(6, 78, 59, 0.94)',
-            border: '1px solid rgba(52, 211, 153, 0.7)',
-            boxShadow: '0 12px 30px -5px rgba(16, 185, 129, 0.5), 0 0 20px rgba(16, 185, 129, 0.3)',
-            backdropFilter: 'blur(12px)',
-            color: 'white',
-            fontSize: '0.85rem',
-            fontWeight: 600,
-            pointerEvents: 'auto',
-          }}
-        >
-          <Check size={16} style={{ color: '#34d399' }} />
+        <div className="status-toast">
+          <Check size={13} style={{ color: 'var(--success)' }} />
           <span>{saveSuccessMsg}</span>
         </div>
       )}
 
       {/* File Path Picker Bar */}
-      <div className="glass-panel" style={{ padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '10px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           {/* Left File Input */}
-          <div style={{ flex: 1, display: 'flex', gap: '8px' }}>
+          <div style={{ flex: 1, display: 'flex', gap: '4px' }}>
             <input
               type="text"
               className="input-field"
-              placeholder="Left File Path"
+              placeholder="Left file"
               value={leftPath}
               onChange={(e) => setLeftPath(e.target.value)}
-              style={{ flex: 1, height: '34px', padding: '6px 10px', fontSize: '0.8rem' }}
+              style={{ flex: 1, height: '28px' }}
             />
-            <button className="btn" onClick={selectLeftFile} style={{ height: '34px', padding: '0 10px', fontSize: '0.8rem' }} title="Browse Left File">
-              <FolderOpen size={15} />
+            <button className="btn" onClick={selectLeftFile} style={{ height: '28px', padding: '0 8px' }} title="Browse Left File">
+              <FolderOpen size={14} />
             </button>
           </div>
 
-          <ArrowLeftRight size={16} style={{ color: 'var(--text-muted)' }} />
-
           {/* Right File Input */}
-          <div style={{ flex: 1, display: 'flex', gap: '8px' }}>
+          <div style={{ flex: 1, display: 'flex', gap: '4px' }}>
             <input
               type="text"
               className="input-field"
-              placeholder="Right File Path"
+              placeholder="Right file"
               value={rightPath}
               onChange={(e) => setRightPath(e.target.value)}
-              style={{ flex: 1, height: '34px', padding: '6px 10px', fontSize: '0.8rem' }}
+              style={{ flex: 1, height: '28px' }}
             />
-            <button className="btn" onClick={selectRightFile} style={{ height: '34px', padding: '0 10px', fontSize: '0.8rem' }} title="Browse Right File">
-              <FolderOpen size={15} />
+            <button className="btn" onClick={selectRightFile} style={{ height: '28px', padding: '0 8px' }} title="Browse Right File">
+              <FolderOpen size={14} />
             </button>
           </div>
 
@@ -344,49 +316,17 @@ export default function TextCompare({
             className="btn btn-primary"
             onClick={runCompare}
             disabled={loading}
-            style={{ height: '34px', paddingLeft: '16px', paddingRight: '16px', fontSize: '0.8rem' }}
+            style={{ height: '28px' }}
           >
-            {loading ? <RefreshCw size={14} className="animate-spin" /> : <ArrowLeftRight size={14} />}
+            {loading && <RefreshCw size={13} className="animate-spin" />}
             Compare
           </button>
 
-          {/* Refresh Button */}
-          <button
-            className="btn"
-            onClick={runCompare}
-            disabled={loading || !leftPath || !rightPath}
-            style={{ height: '34px', padding: '0 10px', fontSize: '0.8rem', display: 'flex', alignItems: 'center' }}
-            title="Refresh File Compare (F5 / Ctrl+R)"
-          >
-            <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
-          </button>
-
-          {/* View Mode Toggle Buttons */}
-          <div style={{ display: 'flex', gap: '2px', background: 'rgba(0, 0, 0, 0.3)', padding: '2px', borderRadius: '6px', border: '1px solid var(--border-color)', height: '34px', alignItems: 'center' }}>
-            <button
-              className={`btn ${viewMode === 'all' ? 'btn-primary' : ''}`}
-              onClick={() => setViewMode('all')}
-              style={{ height: '28px', padding: '0 10px', fontSize: '0.75rem', border: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
-              title="Show All Lines"
-            >
-              <Layers size={13} />
-              <span>All</span>
-            </button>
-            <button
-              className={`btn ${viewMode === 'diffOnly' ? 'btn-primary' : ''}`}
-              onClick={() => setViewMode('diffOnly')}
-              style={{ height: '28px', padding: '0 10px', fontSize: '0.75rem', border: 'none', display: 'flex', alignItems: 'center', gap: '4px', color: viewMode === 'diffOnly' ? 'white' : 'var(--diff-modified-text)' }}
-              title="Show Differences Only"
-            >
-              <GitCompare size={13} />
-              <span>Diff Only</span>
-            </button>
-          </div>
         </div>
 
         {error && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#ef4444', fontSize: '0.85rem' }}>
-            <AlertCircle size={14} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--st-newer)', fontSize: '0.8rem' }}>
+            <AlertCircle size={13} />
             <span>{error}</span>
           </div>
         )}
@@ -398,22 +338,19 @@ export default function TextCompare({
           {/* Left save button */}
           <button
             onClick={() => saveFile('left')}
-            className="btn"
+            className={`btn ${isLeftDirty ? 'btn-primary' : ''}`}
             style={{
-              padding: '6px 14px',
+              padding: '0 10px',
+              height: '26px',
               fontSize: '0.75rem',
-              fontWeight: isLeftDirty ? 600 : 400,
-              background: isLeftDirty ? '#6366f1' : 'transparent',
-              color: isLeftDirty ? 'white' : leftSaveSuccess ? '#10b981' : 'var(--text-primary)',
-              borderColor: isLeftDirty ? '#6366f1' : leftSaveSuccess ? '#10b981' : 'var(--border-color)',
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
             }}
             title="Save Left File (Ctrl+S)"
           >
-            {leftSaveSuccess ? <Check size={14} /> : <Save size={14} />}
-            <span>{leftSaveSuccess ? 'Left Saved!' : isLeftDirty ? 'Save Left File ●' : 'Save Left File'}</span>
+            {leftSaveSuccess ? <Check size={13} style={{ color: 'var(--success)' }} /> : <Save size={13} />}
+            <span>{leftSaveSuccess ? 'Saved' : isLeftDirty ? 'Save Left •' : 'Save Left'}</span>
           </button>
 
           {/* Center: Save Both Files, View Mode, Stats */}
@@ -422,82 +359,35 @@ export default function TextCompare({
               <button
                 onClick={saveAllFiles}
                 className="btn"
-                style={{
-                  padding: '6px 14px',
-                  fontSize: '0.75rem',
-                  background: '#6366f1',
-                  borderColor: '#6366f1',
-                  color: 'white',
-                  fontWeight: 600,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  boxShadow: '0 0 10px rgba(99, 102, 241, 0.35)',
-                }}
+                style={{ padding: '0 10px', height: '26px', fontSize: '0.75rem' }}
                 title="Save both files (Ctrl+S)"
               >
-                <Save size={14} />
-                <span>Save Both Files (Ctrl+S)</span>
+                <Save size={13} />
+                <span>Save Both</span>
               </button>
             )}
 
-            <div style={{ display: 'flex', gap: '2px', background: 'rgba(0, 0, 0, 0.25)', padding: '2px', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
-              <button
-                onClick={() => setViewMode('all')}
-                style={{
-                  padding: '3px 10px',
-                  fontSize: '0.75rem',
-                  height: '24px',
-                  borderRadius: '4px',
-                  border: 'none',
-                  background: viewMode === 'all' ? 'var(--accent-color)' : 'transparent',
-                  color: viewMode === 'all' ? 'white' : 'var(--text-secondary)',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                }}
-                title="Show all lines"
-              >
-                <Layers size={12} />
-                <span>All ({diffRows.length})</span>
+            <div className="segmented">
+              <button onClick={() => setViewMode('all')} className={viewMode === 'all' ? 'is-active' : ''} title="Show all lines">
+                All ({diffRows.length})
               </button>
-
-              <button
-                onClick={() => setViewMode('diffOnly')}
-                style={{
-                  padding: '3px 10px',
-                  fontSize: '0.75rem',
-                  height: '24px',
-                  borderRadius: '4px',
-                  border: 'none',
-                  background: viewMode === 'diffOnly' ? 'var(--accent-color)' : 'transparent',
-                  color: viewMode === 'diffOnly' ? 'white' : 'var(--diff-modified-text)',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  fontWeight: viewMode === 'diffOnly' ? 600 : 400,
-                }}
-                title="Show differences only"
-              >
-                <GitCompare size={12} />
-                <span>Diff Only ({stats.modified + stats.added + stats.removed})</span>
+              <button onClick={() => setViewMode('diffOnly')} className={viewMode === 'diffOnly' ? 'is-active' : ''} title="Show differences only">
+                Diffs ({stats.modified + stats.added + stats.removed})
               </button>
             </div>
 
             <div style={{ display: 'flex', gap: '14px', fontSize: '0.75rem' }}>
               <span style={{ color: 'var(--text-secondary)' }}>
-                Unchanged: <strong style={{ color: 'var(--text-primary)' }}>{stats.unchanged}</strong>
+                Unchanged <strong style={{ color: 'var(--text-primary)', fontWeight: 400 }}>{stats.unchanged}</strong>
               </span>
               <span style={{ color: 'var(--diff-removed-text)' }}>
-                Removed: <strong>{stats.removed}</strong>
+                Removed <strong style={{ fontWeight: 400 }}>{stats.removed}</strong>
               </span>
               <span style={{ color: 'var(--diff-modified-text)' }}>
-                Modified: <strong>{stats.modified}</strong>
+                Modified <strong style={{ fontWeight: 400 }}>{stats.modified}</strong>
               </span>
               <span style={{ color: 'var(--diff-added-text)' }}>
-                Added: <strong>{stats.added}</strong>
+                Added <strong style={{ fontWeight: 400 }}>{stats.added}</strong>
               </span>
             </div>
           </div>
@@ -505,32 +395,28 @@ export default function TextCompare({
           {/* Right save button */}
           <button
             onClick={() => saveFile('right')}
-            className="btn"
+            className={`btn ${isRightDirty ? 'btn-primary' : ''}`}
             style={{
-              padding: '6px 14px',
+              padding: '0 10px',
+              height: '26px',
               fontSize: '0.75rem',
-              fontWeight: isRightDirty ? 600 : 400,
-              background: isRightDirty ? '#10b981' : 'transparent',
-              color: isRightDirty ? 'white' : rightSaveSuccess ? '#10b981' : 'var(--text-primary)',
-              borderColor: isRightDirty ? '#10b981' : rightSaveSuccess ? '#10b981' : 'var(--border-color)',
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
             }}
             title="Save Right File (Ctrl+S)"
           >
-            {rightSaveSuccess ? <Check size={14} /> : <Save size={14} />}
-            <span>{rightSaveSuccess ? 'Right Saved!' : isRightDirty ? 'Save Right File ●' : 'Save Right File'}</span>
+            {rightSaveSuccess ? <Check size={13} style={{ color: 'var(--success)' }} /> : <Save size={13} />}
+            <span>{rightSaveSuccess ? 'Saved' : isRightDirty ? 'Save Right •' : 'Save Right'}</span>
           </button>
         </div>
       )}
 
       {/* Editor Panel Split Screen (5 Columns, 22px strict height) */}
-      <div className="glass-panel" style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
+      <div className="panel" style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
         {diffRows.length === 0 ? (
-          <div style={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', gap: '8px' }}>
-            <FileText size={48} style={{ strokeWidth: 1.5 }} />
-            <span>Select left and right files and click Compare to start.</span>
+          <div style={{ padding: '16px', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+            <span>Pick two files and press Compare.</span>
           </div>
         ) : (
           <div style={{ display: 'flex', width: '100%', height: '100%', overflow: 'hidden' }}>
@@ -541,7 +427,7 @@ export default function TextCompare({
                 ref={leftLineNumbersRef}
                 style={{
                   width: '45px',
-                  backgroundColor: 'rgba(0,0,0,0.15)',
+                  backgroundColor: 'var(--bg-gutter)',
                   color: 'var(--text-muted)',
                   fontFamily: 'var(--font-mono)',
                   fontSize: '0.75rem',
@@ -562,10 +448,10 @@ export default function TextCompare({
                   let numBg = 'transparent';
                   if (row.type === 'removed') {
                     numColor = 'var(--diff-removed-text)';
-                    numBg = 'rgba(239, 68, 68, 0.15)';
+                    numBg = 'var(--diff-removed-bg)';
                   } else if (row.type === 'modified') {
                     numColor = 'var(--diff-modified-text)';
-                    numBg = 'rgba(59, 130, 246, 0.15)';
+                    numBg = 'var(--diff-modified-bg)';
                   }
 
                   return (
@@ -584,9 +470,9 @@ export default function TextCompare({
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            background: 'rgba(0,0,0,0.3)',
-                            borderTop: '1px dashed var(--border-color)',
-                            borderBottom: '1px dashed var(--border-color)',
+                            background: 'var(--bg-header)',
+                            borderTop: '1px solid var(--border-color)',
+                            borderBottom: '1px solid var(--border-color)',
                           }}
                         >
                           ···
@@ -602,7 +488,6 @@ export default function TextCompare({
                           overflow: 'hidden',
                           color: numColor,
                           backgroundColor: numBg,
-                          fontWeight: row.type !== 'unchanged' ? 600 : 400,
                           lineHeight: '22px',
                         }}
                       >
@@ -633,16 +518,13 @@ export default function TextCompare({
                   const showDivider = viewMode === 'diffOnly' && skippedCount > 0;
 
                   let bg = 'transparent';
-                  let textColor = 'var(--text-primary)';
                   let borderLeft = '3px solid transparent';
 
                   if (row.type === 'removed') {
                     bg = 'var(--diff-removed-bg)';
-                    textColor = 'var(--diff-removed-text)';
                     borderLeft = '3px solid var(--diff-removed-border)';
                   } else if (row.type === 'modified') {
                     bg = 'var(--diff-modified-bg)';
-                    textColor = 'var(--diff-modified-text)';
                     borderLeft = '3px solid var(--diff-modified-border)';
                   }
 
@@ -659,17 +541,15 @@ export default function TextCompare({
                             overflow: 'hidden',
                             color: 'var(--text-muted)',
                             fontSize: '0.7rem',
-                            fontStyle: 'italic',
                             display: 'flex',
                             alignItems: 'center',
                             paddingLeft: '12px',
-                            background: 'rgba(0,0,0,0.3)',
-                            borderTop: '1px dashed var(--border-color)',
-                            borderBottom: '1px dashed var(--border-color)',
-                            opacity: 0.7,
+                            background: 'var(--bg-header)',
+                            borderTop: '1px solid var(--border-color)',
+                            borderBottom: '1px solid var(--border-color)',
                           }}
                         >
-                          ··· {skippedCount} unchanged {skippedCount === 1 ? 'line' : 'lines'} omitted ···
+                          {skippedCount} unchanged {skippedCount === 1 ? 'line' : 'lines'}
                         </div>
                       )}
                       <div
@@ -696,7 +576,7 @@ export default function TextCompare({
                             style={{
                               border: 'none',
                               background: 'transparent',
-                              color: textColor,
+                              color: 'var(--text-primary)',
                               fontFamily: 'inherit',
                               fontSize: 'inherit',
                               width: '100%',
@@ -706,7 +586,6 @@ export default function TextCompare({
                               padding: 0,
                               margin: 0,
                               boxSizing: 'border-box',
-                              fontWeight: row.type !== 'unchanged' ? 500 : 400,
                             }}
                           />
                         ) : (
@@ -725,7 +604,7 @@ export default function TextCompare({
               style={{
                 width: '46px',
                 minWidth: '46px',
-                backgroundColor: 'rgba(0,0,0,0.25)',
+                backgroundColor: 'var(--bg-gutter)',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -757,9 +636,9 @@ export default function TextCompare({
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          background: 'rgba(0,0,0,0.3)',
-                          borderTop: '1px dashed var(--border-color)',
-                          borderBottom: '1px dashed var(--border-color)',
+                          background: 'var(--bg-header)',
+                          borderTop: '1px solid var(--border-color)',
+                          borderBottom: '1px solid var(--border-color)',
                         }}
                       >
                         ···
@@ -789,19 +668,8 @@ export default function TextCompare({
                             <button
                               onClick={() => handleMergeLine(row.originalIndex, 'right-to-left')}
                               title="Copy Right line to Left"
-                              style={{
-                                border: 'none',
-                                background: 'rgba(99, 102, 241, 0.2)',
-                                borderRadius: '3px',
-                                cursor: 'pointer',
-                                color: 'var(--diff-modified-text)',
-                                width: '18px',
-                                height: '18px',
-                                padding: 0,
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                              }}
+                              className="icon-btn"
+                              style={{ width: '18px', height: '18px', padding: 0 }}
                             >
                               <ChevronLeft size={13} />
                             </button>
@@ -811,19 +679,8 @@ export default function TextCompare({
                             <button
                               onClick={() => handleMergeLine(row.originalIndex, 'left-to-right')}
                               title="Copy Left line to Right"
-                              style={{
-                                border: 'none',
-                                background: 'rgba(99, 102, 241, 0.2)',
-                                borderRadius: '3px',
-                                cursor: 'pointer',
-                                color: 'var(--diff-modified-text)',
-                                width: '18px',
-                                height: '18px',
-                                padding: 0,
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                              }}
+                              className="icon-btn"
+                              style={{ width: '18px', height: '18px', padding: 0 }}
                             >
                               <ChevronRight size={13} />
                             </button>
@@ -843,7 +700,7 @@ export default function TextCompare({
                 ref={rightLineNumbersRef}
                 style={{
                   width: '45px',
-                  backgroundColor: 'rgba(0,0,0,0.15)',
+                  backgroundColor: 'var(--bg-gutter)',
                   color: 'var(--text-muted)',
                   fontFamily: 'var(--font-mono)',
                   fontSize: '0.75rem',
@@ -864,10 +721,10 @@ export default function TextCompare({
                   let numBg = 'transparent';
                   if (row.type === 'added') {
                     numColor = 'var(--diff-added-text)';
-                    numBg = 'rgba(16, 185, 129, 0.15)';
+                    numBg = 'var(--diff-added-bg)';
                   } else if (row.type === 'modified') {
                     numColor = 'var(--diff-modified-text)';
-                    numBg = 'rgba(59, 130, 246, 0.15)';
+                    numBg = 'var(--diff-modified-bg)';
                   }
 
                   return (
@@ -886,9 +743,9 @@ export default function TextCompare({
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            background: 'rgba(0,0,0,0.3)',
-                            borderTop: '1px dashed var(--border-color)',
-                            borderBottom: '1px dashed var(--border-color)',
+                            background: 'var(--bg-header)',
+                            borderTop: '1px solid var(--border-color)',
+                            borderBottom: '1px solid var(--border-color)',
                           }}
                         >
                           ···
@@ -904,7 +761,6 @@ export default function TextCompare({
                           overflow: 'hidden',
                           color: numColor,
                           backgroundColor: numBg,
-                          fontWeight: row.type !== 'unchanged' ? 600 : 400,
                           lineHeight: '22px',
                         }}
                       >
@@ -935,16 +791,13 @@ export default function TextCompare({
                   const showDivider = viewMode === 'diffOnly' && skippedCount > 0;
 
                   let bg = 'transparent';
-                  let textColor = 'var(--text-primary)';
                   let borderLeft = '3px solid transparent';
 
                   if (row.type === 'added') {
                     bg = 'var(--diff-added-bg)';
-                    textColor = 'var(--diff-added-text)';
                     borderLeft = '3px solid var(--diff-added-border)';
                   } else if (row.type === 'modified') {
                     bg = 'var(--diff-modified-bg)';
-                    textColor = 'var(--diff-modified-text)';
                     borderLeft = '3px solid var(--diff-modified-border)';
                   }
 
@@ -961,17 +814,15 @@ export default function TextCompare({
                             overflow: 'hidden',
                             color: 'var(--text-muted)',
                             fontSize: '0.7rem',
-                            fontStyle: 'italic',
                             display: 'flex',
                             alignItems: 'center',
                             paddingLeft: '12px',
-                            background: 'rgba(0,0,0,0.3)',
-                            borderTop: '1px dashed var(--border-color)',
-                            borderBottom: '1px dashed var(--border-color)',
-                            opacity: 0.7,
+                            background: 'var(--bg-header)',
+                            borderTop: '1px solid var(--border-color)',
+                            borderBottom: '1px solid var(--border-color)',
                           }}
                         >
-                          ··· {skippedCount} unchanged {skippedCount === 1 ? 'line' : 'lines'} omitted ···
+                          {skippedCount} unchanged {skippedCount === 1 ? 'line' : 'lines'}
                         </div>
                       )}
                       <div
@@ -998,7 +849,7 @@ export default function TextCompare({
                             style={{
                               border: 'none',
                               background: 'transparent',
-                              color: textColor,
+                              color: 'var(--text-primary)',
                               fontFamily: 'inherit',
                               fontSize: 'inherit',
                               width: '100%',
@@ -1008,7 +859,6 @@ export default function TextCompare({
                               padding: 0,
                               margin: 0,
                               boxSizing: 'border-box',
-                              fontWeight: row.type !== 'unchanged' ? 500 : 400,
                             }}
                           />
                         ) : (
